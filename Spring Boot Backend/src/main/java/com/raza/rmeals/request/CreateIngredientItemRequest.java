@@ -1,0 +1,14 @@
+package com.raza.rmeals.request;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class CreateIngredientItemRequest {
+    private Long restaurantId;
+    private String name;
+    private Long ingredientCategoryId;
+}
