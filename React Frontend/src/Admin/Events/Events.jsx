@@ -31,7 +31,6 @@ const initialValues = {
 };
 
 const Events = () => {
-  const [image, setimage] = useState("");
   const dispatch = useDispatch();
   const { restaurant, auth } = useSelector((store) => store);
   const [openModal, setOpenModal] = useState(false);
@@ -74,7 +73,7 @@ const Events = () => {
         })
       );
     }
-  }, [restaurant.usersRestaurant]);
+  }, [restaurant.usersRestaurant, dispatch, jwt, auth.jwt]);
 
   return (
     <div>
@@ -91,7 +90,7 @@ const Events = () => {
 
       <div className="mt-5 px-5 flex flex-wrap gap-5">
         {restaurant.restaurantsEvents.map((item) => (
-          <EventCard item={item} />
+          <EventCard item={item} key={item.id} />
         ))}
         {/* <div>
           <img
