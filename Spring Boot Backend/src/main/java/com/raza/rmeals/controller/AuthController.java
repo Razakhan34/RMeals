@@ -3,14 +3,20 @@ package com.raza.rmeals.controller;
 import com.raza.rmeals.config.JwtProvider;
 import com.raza.rmeals.exception.UserException;
 import com.raza.rmeals.model.Cart;
+import com.raza.rmeals.model.PasswordResetToken;
 import com.raza.rmeals.model.USER_ROLE;
 import com.raza.rmeals.model.User;
 import com.raza.rmeals.repository.CartRepository;
 import com.raza.rmeals.repository.UserRepository;
 import com.raza.rmeals.request.LoginRequest;
+import com.raza.rmeals.request.ResetPasswordRequest;
+import com.raza.rmeals.response.ApiResponse;
 import com.raza.rmeals.response.AuthResponse;
+import com.raza.rmeals.service.PasswordResetTokenService;
 import com.raza.rmeals.service.UserDetailsServiceImplementation;
 
+import com.raza.rmeals.service.UserService;
+import jakarta.mail.MessagingException;
 import jdk.jshell.spi.ExecutionControl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,10 +30,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,9 +55,11 @@ public class AuthController {
     @Autowired
     private CartRepository cartRepository;
 
-    // private PasswordResetTokenService passwordResetTokenService;
+    @Autowired
+     private PasswordResetTokenService passwordResetTokenService;
 
-    // private UserService userService;
+    @Autowired
+     private UserService userService;
 
     // public AuthController(UserRepository userRepository,
     // PasswordEncoder passwordEncoder,
@@ -158,5 +163,55 @@ public class AuthController {
             throw new BadCredentialsException("Invalid username or password");
         }
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    }
+
+
+    @PostMapping("/reset-password-request")
+    public ResponseEntity<ApiResponse> resetPassword(@RequestParam("email") String email) throws UserException, MessagingException {
+        System.out.println(email);
+        User user = userService.findUserByEmail(email);
+        System.out.println("ResetPasswordController.resetPassword()");
+
+        if (user == null) {
+            throw new UserException("user not found");
+        }
+
+        userService.sendPasswordResetEmail(user);
+
+        ApiResponse res = new ApiResponse();
+        res.setMessage("Password reset email sent successfully.");
+        res.setStatus(true);
+
+        return ResponseEntity.ok(res);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse> resetPassword(
+
+            @RequestBody ResetPasswordRequest req) throws UserException {
+
+        PasswordResetToken resetToken = passwordResetTokenService.findByToken(req.getToken());
+
+        if (resetToken == null) {
+            throw new UserException("token is required...");
+        }
+        if (resetToken.isExpired()) {
+            passwordResetTokenService.delete(resetToken);
+            throw new UserException("token get expired...");
+
+        }
+
+        // Update user's password
+        User user = resetToken.getUser();
+        userService.updatePassword(user, req.getPassword());
+
+        // Delete the token
+        passwordResetTokenService.delete(resetToken);
+
+        ApiResponse res = new ApiResponse();
+        res.setMessage("Password updated successfully.");
+        res.setStatus(true);
+
+        return ResponseEntity.ok(res);
     }
 }

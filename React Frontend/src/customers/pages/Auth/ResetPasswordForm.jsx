@@ -31,7 +31,7 @@ function ResetPasswordForm() {
     // Handle form submission here
     console.log(values);
     if (values.password === values.confirmedPassword) {
-      console.log("yes its working....");
+      console.log("Password and Confirm password Matched....");
     }
     const data = { password: values.password, token };
     dispatch(resetPassword({ navigate, data }));

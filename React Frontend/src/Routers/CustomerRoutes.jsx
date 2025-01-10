@@ -35,7 +35,7 @@ const CustomerRoutes = () => {
         />
         <Route
           exact
-          path="/password_change_success"
+          path="/password-change-success"
           element={<PasswordChangeSuccess />}
         />
         <Route exact path="/*" element={<NotFound />} />
