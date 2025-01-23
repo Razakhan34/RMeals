@@ -26,4 +26,8 @@ public class Address {
     private String postalCode;
 
     private String country;
+
+    private double latitude;
+
+    private double longitude;
 }

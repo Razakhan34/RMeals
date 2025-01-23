@@ -1,4 +1,3 @@
-export const cartTotal=(items)=>{
-
-   return items.reduce((accumlatore, item)=>item.totalPrice+accumlatore,0)
-}
+export const cartTotal = (items) => {
+  return items.reduce((accumlatore, item) => item.totalPrice + accumlatore, 0);
+};

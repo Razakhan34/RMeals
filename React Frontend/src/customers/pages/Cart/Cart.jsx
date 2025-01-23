@@ -54,7 +54,7 @@ const Cart = () => {
   const handleShowAddressForm = () => setShowAddressForm(!showAddressForm);
   const handleCloseSnackbar = () => setOpenSnackbar(false);
 
-  const handleSubmit = (values, { resetForm }) => {
+  const handleSubmit = async (values, { resetForm }) => {
     const data = {
       token: localStorage.getItem("jwt"),
       order: {
@@ -69,6 +69,25 @@ const Cart = () => {
         },
       },
     };
+
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+      values["address-line1 address-search"]
+    )}.json?access_token=${accessToken}`;
+
+    try {
+      const response = await fetch(url);
+      const geoLocationData = await response.json();
+
+      if (geoLocationData.features && geoLocationData.features.length > 0) {
+        const location = geoLocationData.features[0].center; // [longitude, latitude]
+        data.order.deliveryAddress.latitude = location[1];
+        data.order.deliveryAddress.longitude = location[0];
+      } else {
+        alert("Some Error Occured , try again...");
+      }
+    } catch (error) {
+      alert("Some Error Occured , try again..." + error);
+    }
 
     if (isValid(cart.cartItems)) {
       dispatch(createOrder(data));

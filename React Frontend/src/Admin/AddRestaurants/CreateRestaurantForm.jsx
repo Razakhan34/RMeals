@@ -9,14 +9,15 @@ import { createRestaurant } from "../../State/Customers/Restaurant/restaurant.ac
 import CloseIcon from "@mui/icons-material/Close";
 import { uploadToCloudinary } from "../utils/UploadToCloudnary";
 import { CircularProgress, IconButton } from "@mui/material";
+import { AddressAutofill } from "@mapbox/search-js-react";
 const initialValues = {
   name: "",
   description: "",
   cuisineType: "",
-  streetAddress: "",
+  address_line1: "",
   city: "",
-  stateProvince: "",
-  postalCode: "",
+  state: "",
+  zip: "",
   country: "",
   email: "",
   mobile: "",
@@ -31,16 +32,18 @@ const CreateRestaurantForm = () => {
   const token = localStorage.getItem("jwt");
   const [uploadImage, setUploadingImage] = useState("");
 
-  const handleSubmit = (values) => {
+  const accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
+
+  const handleSubmit = async (values) => {
     const data = {
       name: values.name,
       description: values.description,
       cuisineType: values.cuisineType,
       address: {
-        streetAddress: values.streetAddress,
+        streetAddress: values["address-line1 address-search"],
         city: values.city,
-        stateProvince: values.stateProvince,
-        postalCode: values.postalCode,
+        state: values.state,
+        postalCode: values.zip,
         country: values.country,
       },
       contactInformation: {
@@ -52,8 +55,28 @@ const CreateRestaurantForm = () => {
       openingHours: values.openingHours,
       images: values.images,
     };
+
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+      values["address-line1 address-search"]
+    )}.json?access_token=${accessToken}`;
+
+    try {
+      const response = await fetch(url);
+      const geoLocationData = await response.json();
+
+      if (geoLocationData.features && geoLocationData.features.length > 0) {
+        const location = geoLocationData.features[0].center; // [longitude, latitude]
+        data.address.latitude = location[1];
+        data.address.longitude = location[0];
+      } else {
+        alert("Some Error Occured , try again...");
+      }
+    } catch (error) {
+      alert("Some Error Occured , try again..." + error);
+    }
+
     dispatch(createRestaurant({ data, token }));
-    console.log(data);
+    // console.log(data);
   };
 
   const formik = useFormik({
@@ -77,13 +100,14 @@ const CreateRestaurantForm = () => {
 
   return (
     <div className="py-10 px-5 lg:flex items-center justify-center min-h-screen">
-      <div className="lg:max-w-4xl ">
+      <div className="lg:max-w-4xl w-full">
         <h1 className="font-bold text-2xl text-center py-2">
           Add New Restaurant
         </h1>
-        <form onSubmit={formik.handleSubmit} className="space-y-4">
-          <Grid container spacing={2}>
-            <Grid className="flex flex-wrap gap-5" item xs={12}>
+        <form onSubmit={formik.handleSubmit} className="space-y-6">
+          <div className="grid gap-6">
+            {/* Image Upload */}
+            <div className="flex flex-wrap gap-5">
               <input
                 type="file"
                 accept="image/*"
@@ -91,25 +115,21 @@ const CreateRestaurantForm = () => {
                 style={{ display: "none" }}
                 onChange={handleImageChange}
               />
-
-              
-              <label className="relative" htmlFor="fileInput">
+              <label htmlFor="fileInput" className="relative">
                 <span className="w-24 h-24 cursor-pointer flex items-center justify-center p-3 border rounded-md border-gray-600">
-                  <AddPhotoAlternateIcon
-                    className="text-white"
-                  />
+                  <AddPhotoAlternateIcon className="text-white" />
                 </span>
-                {uploadImage && <div className="absolute left-0 right-0 top-0 bottom-0 w-24 h-24 flex justify-center items-center">
-                <CircularProgress />
-                </div>}
+                {uploadImage && (
+                  <div className="absolute inset-0 w-24 h-24 flex justify-center items-center">
+                    <CircularProgress />
+                  </div>
+                )}
               </label>
-
               <div className="flex flex-wrap gap-2">
                 {formik.values.images.map((image, index) => (
-                  <div className="relative">
+                  <div className="relative" key={index}>
                     <img
                       className="w-24 h-24 object-cover"
-                      key={index}
                       src={image}
                       alt={`ProductImage ${index + 1}`}
                     />
@@ -128,156 +148,172 @@ const CreateRestaurantForm = () => {
                   </div>
                 ))}
               </div>
-            </Grid>
+            </div>
 
-            <Grid item xs={12}>
+            {/* Restaurant Information */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <TextField
                 fullWidth
                 id="name"
                 name="name"
                 label="Name"
                 variant="outlined"
+                InputProps={{ style: { padding: "10px" } }}
                 onChange={formik.handleChange}
                 value={formik.values.name}
               />
-            </Grid>
-            <Grid item xs={12}>
               <TextField
                 fullWidth
                 id="description"
                 name="description"
                 label="Description"
                 variant="outlined"
+                InputProps={{ style: { padding: "10px" } }}
                 onChange={formik.handleChange}
                 value={formik.values.description}
               />
-            </Grid>
-            <Grid item xs={6}>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <TextField
                 fullWidth
                 id="cuisineType"
                 name="cuisineType"
                 label="Cuisine Type"
                 variant="outlined"
+                InputProps={{ style: { padding: "10px" } }}
                 onChange={formik.handleChange}
                 value={formik.values.cuisineType}
               />
-            </Grid>
-            <Grid item xs={6}>
               <TextField
                 fullWidth
                 id="openingHours"
                 name="openingHours"
                 label="Opening Hours"
                 variant="outlined"
+                InputProps={{ style: { padding: "10px" } }}
                 onChange={formik.handleChange}
                 value={formik.values.openingHours}
               />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                id="streetAddress"
-                name="streetAddress"
-                label="Street Address"
-                variant="outlined"
-                onChange={formik.handleChange}
-                value={formik.values.streetAddress}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                fullWidth
-                id="city"
-                name="city"
-                label="City"
-                variant="outlined"
-                onChange={formik.handleChange}
-                value={formik.values.city}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                fullWidth
-                id="stateProvince"
-                name="stateProvince"
-                label="State/Province"
-                variant="outlined"
-                onChange={formik.handleChange}
-                value={formik.values.stateProvince}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                fullWidth
-                id="postalCode"
-                name="postalCode"
-                label="Postal Code"
-                variant="outlined"
-                onChange={formik.handleChange}
-                value={formik.values.postalCode}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                id="country"
-                name="country"
-                label="Country"
-                variant="outlined"
-                onChange={formik.handleChange}
-                value={formik.values.country}
-              />
-            </Grid>
-            <Grid item xs={6}>
+            </div>
+
+            {/* AddressAutofill */}
+            <AddressAutofill accessToken={accessToken}>
+              <div className="grid grid-cols-1 gap-6">
+                <TextField
+                  fullWidth
+                  id="streetAddress"
+                  name="address-line1"
+                  label="Street Address"
+                  variant="outlined"
+                  InputProps={{ style: { padding: "10px" } }}
+                  autoComplete="address-line1"
+                  onChange={formik.handleChange}
+                  value={formik.values["address-line1 address-search"]}
+                />
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+                <TextField
+                  fullWidth
+                  id="city"
+                  name="city"
+                  label="City"
+                  variant="outlined"
+                  InputProps={{ style: { padding: "10px" } }}
+                  autoComplete="address-level2"
+                  onChange={formik.handleChange}
+                  value={formik.values.city}
+                />
+                <TextField
+                  fullWidth
+                  id="state"
+                  name="state"
+                  label="State/Province"
+                  variant="outlined"
+                  InputProps={{ style: { padding: "10px" } }}
+                  autoComplete="address-level1"
+                  onChange={formik.handleChange}
+                  value={formik.values.state}
+                />
+                <TextField
+                  fullWidth
+                  id="zip"
+                  name="zip"
+                  label="Postal Code"
+                  variant="outlined"
+                  InputProps={{ style: { padding: "10px" } }}
+                  autoComplete="postal-code"
+                  onChange={formik.handleChange}
+                  value={formik.values.zip}
+                />
+              </div>
+              <div className="grid grid-cols-1 gap-6 mt-4">
+                <TextField
+                  fullWidth
+                  id="country"
+                  name="country"
+                  label="Country"
+                  variant="outlined"
+                  InputProps={{ style: { padding: "10px" } }}
+                  autoComplete="country-name"
+                  onChange={formik.handleChange}
+                  value={formik.values.country}
+                />
+              </div>
+            </AddressAutofill>
+
+            {/* Contact Information */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-0">
               <TextField
                 fullWidth
                 id="email"
                 name="email"
                 label="Email"
                 variant="outlined"
+                InputProps={{ style: { padding: "10px" } }}
                 onChange={formik.handleChange}
                 value={formik.values.email}
               />
-            </Grid>
-            <Grid item xs={6}>
               <TextField
                 fullWidth
                 id="mobile"
                 name="mobile"
                 label="Mobile"
                 variant="outlined"
+                InputProps={{ style: { padding: "10px" } }}
                 onChange={formik.handleChange}
                 value={formik.values.mobile}
               />
-            </Grid>
-            <Grid item xs={6}>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <TextField
                 fullWidth
                 id="twitter"
                 name="twitter"
                 label="Twitter"
                 variant="outlined"
+                InputProps={{ style: { padding: "10px" } }}
                 onChange={formik.handleChange}
                 value={formik.values.twitter}
               />
-            </Grid>
-            <Grid item xs={6}>
               <TextField
                 fullWidth
                 id="instagram"
                 name="instagram"
                 label="Instagram"
                 variant="outlined"
+                InputProps={{ style: { padding: "10px" } }}
                 onChange={formik.handleChange}
                 value={formik.values.instagram}
               />
-            </Grid>
-            
-          </Grid>
-          <Button variant="contained" color="primary" type="submit">
-            Create Restaurant
-          </Button>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-center mt-6">
+            <Button variant="contained" color="primary" type="submit">
+              Create Restaurant
+            </Button>
+          </div>
         </form>
       </div>
     </div>

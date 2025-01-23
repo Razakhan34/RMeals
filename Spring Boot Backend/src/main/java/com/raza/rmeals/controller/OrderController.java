@@ -4,6 +4,7 @@ import com.raza.rmeals.exception.*;
 import com.raza.rmeals.model.Order;
 import com.raza.rmeals.model.User;
 import com.raza.rmeals.request.CreateOrderRequest;
+import com.raza.rmeals.response.OrderAddressResponse;
 import com.raza.rmeals.response.PaymentResponse;
 import com.raza.rmeals.service.OrderService;
 import com.raza.rmeals.service.UserService;
@@ -37,7 +38,14 @@ public class OrderController {
         }else throw new OrderException("Please provide valid request body");
     }
 
-
+    @GetMapping("/track-order/{orderId}")
+    public ResponseEntity<OrderAddressResponse> trackOrder(@PathVariable Long orderId,
+                                                           @RequestHeader("Authorization") String jwt)
+                                                            throws OrderException {
+        // Get the order details by orderId
+       OrderAddressResponse response = orderService.getOrderAddress(orderId);
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/order/user")
     public ResponseEntity<List<Order>> getAllUserOrders(@RequestHeader("Authorization") String jwt) throws OrderException, UserException{

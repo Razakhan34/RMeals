@@ -187,7 +187,6 @@ public class AuthController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse> resetPassword(
-
             @RequestBody ResetPasswordRequest req) throws UserException {
 
         PasswordResetToken resetToken = passwordResetTokenService.findByToken(req.getToken());

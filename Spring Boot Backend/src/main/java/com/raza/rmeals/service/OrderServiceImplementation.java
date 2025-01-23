@@ -4,8 +4,10 @@ import com.raza.rmeals.exception.*;
 import com.raza.rmeals.model.*;
 import com.raza.rmeals.repository.*;
 import com.raza.rmeals.request.CreateOrderRequest;
+import com.raza.rmeals.response.OrderAddressResponse;
 import com.raza.rmeals.response.PaymentResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -57,8 +59,11 @@ public class OrderServiceImplementation implements OrderService {
                                 existingAddress.getCity().equals(shippAddress.getCity()) &&
                                 existingAddress.getState().equals(shippAddress.getState()) &&
                                 existingAddress.getPostalCode().equals(shippAddress.getPostalCode()) &&
-                                existingAddress.getCountry().equals(shippAddress.getCountry())
-        );
+                                existingAddress.getCountry().equals(shippAddress.getCountry()) &&
+                                Math.abs(existingAddress.getLatitude() - shippAddress.getLatitude()) < 0.00001 &&
+                                Math.abs(existingAddress.getLongitude() - shippAddress.getLongitude()) < 0.00001
+                );
+
 
         Address savedAddress = addressRepository.save(shippAddress);
 
@@ -117,13 +122,32 @@ public class OrderServiceImplementation implements OrderService {
 
     @Override
     public void cancelOrder(Long orderId) throws OrderException {
-        Order order =findOrderById(orderId);
+        Order order = findOrderById(orderId);
         if(order==null) {
             throw new OrderException("Order not found with the id "+orderId);
         }
 
         orderRepository.deleteById(orderId);
 
+    }
+
+    @Override
+    public OrderAddressResponse getOrderAddress(Long orderId) throws OrderException {
+        Order order = findOrderById(orderId);
+
+        if (order == null) {
+            throw new OrderException("Order not found with the id "+orderId);
+        }
+
+        // Get the restaurant address and user delivery address
+        Address restaurantAddress = order.getRestaurant().getAddress();
+        Address deliveryAddress = order.getDeliveryAddress();
+
+        // Prepare the response
+        OrderAddressResponse orderAddressResponse = new OrderAddressResponse();
+        orderAddressResponse.setRestaurantAddress(restaurantAddress);
+        orderAddressResponse.setDeliveryAddress(deliveryAddress);
+        return orderAddressResponse;
     }
 
     public Order findOrderById(Long orderId) throws OrderException {

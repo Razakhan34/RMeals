@@ -4,6 +4,7 @@ import com.raza.rmeals.exception.*;
 import com.raza.rmeals.model.Order;
 import com.raza.rmeals.model.User;
 import com.raza.rmeals.request.CreateOrderRequest;
+import com.raza.rmeals.response.OrderAddressResponse;
 import com.raza.rmeals.response.PaymentResponse;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public interface OrderService {
     public void cancelOrder(Long orderId) throws OrderException;
 
     public List<Order> getUserOrders(Long userId) throws OrderException;
-
+    public OrderAddressResponse getOrderAddress(Long orderId) throws OrderException;
     public List<Order> getOrdersOfRestaurant(Long restaurantId,String orderStatus)
             throws OrderException, RestaurantException;
 }

@@ -3,6 +3,7 @@ import {
   createOrderFailure,
   createOrderRequest,
   createOrderSuccess,
+  getUsersOrdersAddressSuccess,
   getUsersOrdersFailure,
   getUsersOrdersRequest,
   getUsersOrdersSuccess,
@@ -44,6 +45,23 @@ export const getUsersOrders = (jwt) => {
       });
       console.log("users order ", data);
       dispatch(getUsersOrdersSuccess(data));
+    } catch (error) {
+      dispatch(getUsersOrdersFailure(error));
+    }
+  };
+};
+
+export const getUsersOrdersAddress = (jwt, orderId) => {
+  return async (dispatch) => {
+    console.log("came herw");
+    dispatch(getUsersOrdersRequest());
+    try {
+      const { data } = await api.get(`/api/track-order/${orderId}`, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+      dispatch(getUsersOrdersAddressSuccess(data));
     } catch (error) {
       dispatch(getUsersOrdersFailure(error));
     }

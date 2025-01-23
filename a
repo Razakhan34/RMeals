@@ -1,0 +1,5 @@
+[33mb3a9444[m[33m ([m[1;36mHEAD -> [m[1;32mautofilladdress-and-route-direction[m[33m, [m[1;31morigin/autofilladdress-and-route-direction[m[33m)[m Worked done on AddressAutoFill when user add the address to receive the order
+[33maced37c[m[33m ([m[1;31morigin/password-reset-features[m[33m, [m[1;32mpassword-reset-features[m[33m)[m Successfully completed Password Reset Feature with amazing UI by using thymeleaf library and spring mail
+[33mca3f449[m[33m ([m[1;32mmain[m[33m)[m Add gitignore file in root
+[33m4ba70bd[m[33m ([m[1;31morigin/main[m[33m)[m Added events features in backend and working fine in admin side
+[33m7363edd[m done with basic setup of RMeals Food delivery app

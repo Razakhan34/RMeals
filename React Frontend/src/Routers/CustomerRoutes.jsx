@@ -10,6 +10,7 @@ import CreateRestaurantForm from "../Admin/AddRestaurants/CreateRestaurantForm";
 import Restaurant from "../customers/pages/Restaurant/Restaurant";
 import PasswordChangeSuccess from "../customers/pages/Auth/PasswordChangeSuccess";
 import NotFound from "../customers/pages/NotFound/NotFound";
+import TrackOrder from "../customers/pages/Orders/TrackOrder";
 
 const CustomerRoutes = () => {
   return (
@@ -28,6 +29,7 @@ const CustomerRoutes = () => {
         <Route path="/cart" element={<Cart />} />
         <Route path="/payment/success/:id" element={<PaymentSuccess />} />
         <Route path="/my-profile/*" element={<Profile />} />
+        <Route path="/track-order/:id" element={<TrackOrder />} />
         <Route path="/search" element={<Search />} />
         <Route
           path="/admin/add-restaurant"
