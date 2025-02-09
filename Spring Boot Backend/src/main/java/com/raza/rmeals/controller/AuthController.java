@@ -121,7 +121,6 @@ public class AuthController {
         authResponse.setJwt(token);
         authResponse.setMessage("Register Success");
         authResponse.setRole(savedUser.getRole());
-
         return new ResponseEntity<>(authResponse, HttpStatus.OK);
 
     }

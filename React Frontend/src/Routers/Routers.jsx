@@ -15,17 +15,11 @@ const Routers = () => {
 
   return (
     <>
-   
-    <Routes>
-      
-      <Route
-        path="/admin/restaurant/*"
-        element={<AdminRouters/>}
-      />
-      <Route path="/*" element={<CustomerRoutes />} />
-    </Routes>
+      <Routes>
+        <Route path="/admin/restaurant/*" element={<AdminRouters />} />
+        <Route path="/*" element={<CustomerRoutes />} />
+      </Routes>
     </>
-    
   );
 };
 

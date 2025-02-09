@@ -4,6 +4,8 @@ import MultipleItemsCarousel from "../../components/MultiItemCarousel/MultiItemC
 import RestaurantCard from "../../components/RestarentCard/RestaurantCard";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllRestaurantsAction } from "../../../State/Customers/Restaurant/restaurant.action";
+import { Link } from "react-router-dom";
+import Footer from "../../components/Footer/Footer";
 // import { getAllRestaurantsAction } from "../../../State/Restaurant/Action";
 // import RestarantCard from "../../components/RestarentCard/Restaurant";
 
@@ -43,6 +45,17 @@ const HomePage = () => {
           <h1 className="text-2xl font-semibold text-gray-400 py-3 ">
             Order From Our Handpicked Favorites
           </h1>
+          {auth == null && (
+            <p className="text-center text-xl text-gray-300 mt-5 mb-5">
+              Login to get more restaurants nearby{" "}
+              <Link
+                to="/account/login"
+                className="text-[#40916c]-400 font-semibold hover:underline"
+              >
+                Login Now
+              </Link>
+            </p>
+          )}
           <div className="flex flex-wrap  items-center ">
             {restaurant.restaurants.map((item, i) => (
               <RestaurantCard data={item} index={i} key={i} />
@@ -50,6 +63,10 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      <footer>
+        <Footer />
+      </footer>
     </div>
   );
 };
