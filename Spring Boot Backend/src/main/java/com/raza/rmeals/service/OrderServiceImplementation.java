@@ -147,7 +147,13 @@ public class OrderServiceImplementation implements OrderService {
         OrderAddressResponse orderAddressResponse = new OrderAddressResponse();
         orderAddressResponse.setRestaurantAddress(restaurantAddress);
         orderAddressResponse.setDeliveryAddress(deliveryAddress);
+        orderAddressResponse.setOrder(order);
         return orderAddressResponse;
+    }
+
+    @Override
+    public Order getOrder(Long orderId) throws OrderException {
+        return findOrderById(orderId);
     }
 
     public Order findOrderById(Long orderId) throws OrderException {
@@ -191,7 +197,7 @@ public class OrderServiceImplementation implements OrderService {
         System.out.println("--------- "+orderStatus);
 
         if(orderStatus.equals("OUT_FOR_DELIVERY") || orderStatus.equals("DELIVERED")
-                || orderStatus.equals("COMPLETED") || orderStatus.equals("PENDING")) {
+                || orderStatus.equals("SHIPPED") || orderStatus.equals("PENDING")) {
             order.setOrderStatus(orderStatus);
 //            Notification notification=notificationicationService.sendOrderStatusNotification(order);
             return orderRepository.save(order);

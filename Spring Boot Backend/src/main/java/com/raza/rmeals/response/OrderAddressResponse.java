@@ -1,6 +1,7 @@
 package com.raza.rmeals.response;
 
 import com.raza.rmeals.model.Address;
+import com.raza.rmeals.model.Order;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class OrderAddressResponse {
     private Address restaurantAddress;
     private Address deliveryAddress;
+    private Order order;
 }

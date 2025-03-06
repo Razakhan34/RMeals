@@ -47,6 +47,16 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+//    Get Details of single order
+    @GetMapping("/order/{orderId}")
+    public ResponseEntity<Order> getOrder(@PathVariable Long orderId,
+                                                           @RequestHeader("Authorization") String jwt)
+            throws OrderException {
+        // Get the order details by orderId
+        Order response = orderService.getOrder(orderId);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/order/user")
     public ResponseEntity<List<Order>> getAllUserOrders(@RequestHeader("Authorization") String jwt) throws OrderException, UserException{
 

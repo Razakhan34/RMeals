@@ -40,7 +40,7 @@ const RestaurantsOrder = () => {
         jwt: auth.jwt || jwt,
       })
     );
-  }, [auth.jwt, filterValue]);
+  }, [auth.jwt, filterValue, dispatch, jwt, restaurant]);
 
   const handleFilter = (e, value) => {
     const searchParams = new URLSearchParams(location.search);
@@ -52,7 +52,7 @@ const RestaurantsOrder = () => {
     const query = searchParams.toString();
     navigate({ search: `?${query}` });
   };
-  
+
   return (
     <div className="px-2">
       <Card className="p-5">

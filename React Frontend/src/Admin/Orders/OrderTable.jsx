@@ -33,7 +33,7 @@ import { updateOrderStatus } from "../../State/Admin/Order/restaurants.order.act
 
 const orderStatus = [
   { label: "Pending", value: "PENDING" },
-  { label: "Completed", value: "COMPLETED" },
+  { label: "Shipped", value: "SHIPPED" },
   { label: "Out For Delivery", value: "OUT_FOR_DELIVERY" },
   { label: "Delivered", value: "DELIVERED" },
 ];
@@ -98,6 +98,7 @@ const OrdersTable = ({ isDashboard, name }) => {
             </TableHead>
             <TableBody>
               {restaurantsOrder.orders
+                ?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                 ?.slice(0, isDashboard ? 7 : restaurantsOrder.orders.length)
                 .map((item, index) => (
                   <TableRow

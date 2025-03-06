@@ -53,7 +53,6 @@ export const getUsersOrders = (jwt) => {
 
 export const getUsersOrdersAddress = (jwt, orderId) => {
   return async (dispatch) => {
-    console.log("came herw");
     dispatch(getUsersOrdersRequest());
     try {
       const { data } = await api.get(`/api/track-order/${orderId}`, {

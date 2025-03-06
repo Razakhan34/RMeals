@@ -35,8 +35,8 @@ const RouteMap = ({ pickupInformation, dropInformation }) => {
 
         const distance = data.routes[0].distance / 1000; // Convert to km
         const duration = data.routes[0].duration / 60; // Convert to minutes
-        console.log(`Distance: ${distance.toFixed(2)} km`);
-        console.log(`Duration: ${duration.toFixed(2)} minutes`);
+        // console.log(`Distance: ${distance.toFixed(2)} km`);
+        // console.log(`Duration: ${duration.toFixed(2)} minutes`);
 
         return routeData;
       } else {
