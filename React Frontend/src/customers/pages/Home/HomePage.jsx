@@ -13,6 +13,8 @@ const HomePage = () => {
   const { auth, restaurant } = useSelector((store) => store);
   const dispatch = useDispatch();
 
+  console.log(auth);
+
   useEffect(() => {
     if (auth.user) {
       dispatch(getAllRestaurantsAction(localStorage.getItem("jwt")));
@@ -45,7 +47,7 @@ const HomePage = () => {
           <h1 className="text-2xl font-semibold text-gray-400 py-3 ">
             Order From Our Handpicked Favorites
           </h1>
-          {auth == null && (
+          {auth.user == null && (
             <p className="text-center text-xl text-gray-300 mt-5 mb-5">
               Login to get more restaurants nearby{" "}
               <Link
@@ -56,11 +58,13 @@ const HomePage = () => {
               </Link>
             </p>
           )}
-          <div className="flex flex-wrap  items-center ">
-            {restaurant.restaurants.map((item, i) => (
-              <RestaurantCard data={item} index={i} key={i} />
-            ))}
-          </div>
+          {auth.user != null && (
+            <div className="flex flex-wrap  items-center ">
+              {restaurant.restaurants.map((item, i) => (
+                <RestaurantCard data={item} index={i} key={i} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

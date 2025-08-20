@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, redirect, Route, Routes } from "react-router-dom";
 import HomePage from "../customers/pages/Home/HomePage";
 import Navbar from "../customers/components/Navbar/Navbar";
 import Cart from "../customers/pages/Cart/Cart";
@@ -11,8 +11,17 @@ import Restaurant from "../customers/pages/Restaurant/Restaurant";
 import PasswordChangeSuccess from "../customers/pages/Auth/PasswordChangeSuccess";
 import NotFound from "../customers/pages/NotFound/NotFound";
 import TrackOrder from "../customers/pages/Orders/TrackOrder";
+import ProtectedRoute from "./ProtectedRoutes";
+import { useSelector } from "react-redux";
 
 const CustomerRoutes = () => {
+  const { auth } = useSelector((store) => store);
+  if (
+    auth?.user?.role === "ROLE_ADMIN" ||
+    auth?.user?.role === "ROLE_RESTAURANT_OWNER"
+  ) {
+    return <Navigate to="/admin/restaurant/" replace />;
+  }
   return (
     <div className="relative">
       <nav className="sticky top-0 z-50">
@@ -24,12 +33,18 @@ const CustomerRoutes = () => {
         <Route
           exact
           path="/restaurant/:city/:title/:id"
-          element={<Restaurant />}
+          element={<ProtectedRoute element={<Restaurant />} />}
         />
         <Route path="/cart" element={<Cart />} />
         <Route path="/payment/success/:id" element={<PaymentSuccess />} />
-        <Route path="/my-profile/*" element={<Profile />} />
-        <Route path="/track-order/:id" element={<TrackOrder />} />
+        <Route
+          path="/my-profile/*"
+          element={<ProtectedRoute element={<Profile />} />}
+        />
+        <Route
+          path="/track-order/:id"
+          element={<ProtectedRoute element={<TrackOrder />} />}
+        />
         <Route path="/search" element={<Search />} />
         <Route
           path="/admin/add-restaurant"

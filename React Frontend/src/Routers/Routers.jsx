@@ -9,6 +9,7 @@ import NotFound from "../customers/pages/NotFound/NotFound";
 import IngredientsList from "../Data/Demo";
 import CreateRestaurantForm from "../Admin/AddRestaurants/CreateRestaurantForm";
 import AdminRouters from "./AdminRouters";
+import ProtectedRoute from "./ProtectedRoutes";
 
 const Routers = () => {
   const { auth } = useSelector((store) => store);
@@ -16,7 +17,11 @@ const Routers = () => {
   return (
     <>
       <Routes>
-        <Route path="/admin/restaurant/*" element={<AdminRouters />} />
+        <Route
+          path="/admin/restaurant/*"
+          element={<ProtectedRoute element={<AdminRouters />} />}
+        />
+
         <Route path="/*" element={<CustomerRoutes />} />
       </Routes>
     </>

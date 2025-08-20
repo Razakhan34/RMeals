@@ -6,6 +6,7 @@ import LoginForm from "../../components/Login/Login";
 import ResetPasswordRequest from "./ResetPaswordRequest";
 import { useSelector } from "react-redux";
 import ResetPasswordForm from "./ResetPasswordForm";
+import LoginRoute from "../../../Routers/LoginRoute";
 
 const style = {
   position: "absolute",
@@ -46,9 +47,9 @@ const Auth = ({ open, handleClose }) => {
       >
         <Box sx={style}>
           {location.pathname === "/account/register" ? (
-            <RegistrationForm />
+            <LoginRoute element={<RegistrationForm />} />
           ) : location.pathname === "/account/login" ? (
-            <LoginForm />
+            <LoginRoute element={<LoginForm />} />
           ) : location.pathname === "/account/reset-password" ? (
             <ResetPasswordForm />
           ) : (

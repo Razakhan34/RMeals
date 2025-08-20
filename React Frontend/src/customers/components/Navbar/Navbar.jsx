@@ -11,6 +11,7 @@ import Auth from "../../pages/Auth/Auth";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../State/Authentication/Action";
 import { pink } from "@mui/material/colors";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -62,11 +63,10 @@ const Navbar = () => {
   return (
     <div className="px-5 z-50 py-[.8rem] bg-[#212529]  lg:px-20 flex justify-between">
       <div className="flex items-center space-x-4">
-        <div
-          onClick={navigateToHome}
-          className="lg:mr-10 cursor-pointer flex items-center space-x-4"
-        >
-          <li className="logo font-semibold text-gray-300 text-2xl">RMeals</li>
+        <div className="lg:mr-10 cursor-pointer flex items-center space-x-4">
+          <Link to="/" className="logo font-semibold text-gray-300 text-2xl">
+            RMeals
+          </Link>
         </div>
         {/* <li className="font font-semibold">Home</li> */}
       </div>
