@@ -31,6 +31,9 @@ public class RestaurantServiceImplementation implements RestaurantService {
   @Autowired
   private UserRepository userRepository;
 
+  @Autowired
+  private FileUploadS3Service fileUploadS3Service;
+
   @Override
   public Restaurant createRestaurant(CreateRestaurantRequest req, User user) {
     Address savedAddress =  savedAddress(req);
@@ -94,6 +97,17 @@ public class RestaurantServiceImplementation implements RestaurantService {
   public void deleteRestaurant(Long restaurantId) throws RestaurantException {
     Restaurant restaurant = findRestaurantById(restaurantId);
     if (restaurant != null) {
+      // Delete all images from S3 before removing restaurant
+      if (restaurant.getImages() != null && !restaurant.getImages().isEmpty()) {
+        for (String imgUrl : restaurant.getImages()) {
+          try {
+            fileUploadS3Service.deleteFile(imgUrl);
+          } catch (Exception e) {
+            // Log the error but don't stop deletion
+            System.err.println("Failed to delete image from S3: " + imgUrl + " error: " + e.getMessage());
+          }
+        }
+      }
       restaurantRepository.delete(restaurant);
       return;
     }

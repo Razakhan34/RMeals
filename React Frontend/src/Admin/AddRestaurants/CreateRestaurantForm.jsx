@@ -2,14 +2,13 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
 import { useDispatch } from "react-redux";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import { createRestaurant } from "../../State/Customers/Restaurant/restaurant.action";
 import CloseIcon from "@mui/icons-material/Close";
-import { uploadToCloudinary } from "../utils/UploadToCloudnary";
 import { CircularProgress, IconButton } from "@mui/material";
 import { AddressAutofill } from "@mapbox/search-js-react";
+import { createRestaurant } from "../../State/Customers/Restaurant/restaurant.action"; // your redux action
+
 const initialValues = {
   name: "",
   description: "",
@@ -30,65 +29,68 @@ const initialValues = {
 const CreateRestaurantForm = () => {
   const dispatch = useDispatch();
   const token = localStorage.getItem("jwt");
-  const [uploadImage, setUploadingImage] = useState("");
-
+  const [uploadingImage, setUploadingImage] = useState(false);
   const accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
-
-  const handleSubmit = async (values) => {
-    const data = {
-      name: values.name,
-      description: values.description,
-      cuisineType: values.cuisineType,
-      address: {
-        streetAddress: values["address-line1 address-search"],
-        city: values.city,
-        state: values.state,
-        postalCode: values.zip,
-        country: values.country,
-      },
-      contactInformation: {
-        email: values.email,
-        mobile: values.mobile,
-        twitter: values.twitter,
-        instagram: values.instagram,
-      },
-      openingHours: values.openingHours,
-      images: values.images,
-    };
-
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-      values["address-line1 address-search"]
-    )}.json?access_token=${accessToken}`;
-
-    try {
-      const response = await fetch(url);
-      const geoLocationData = await response.json();
-
-      if (geoLocationData.features && geoLocationData.features.length > 0) {
-        const location = geoLocationData.features[0].center; // [longitude, latitude]
-        data.address.latitude = location[1];
-        data.address.longitude = location[0];
-      } else {
-        alert("Some Error Occured , try again...");
-      }
-    } catch (error) {
-      alert("Some Error Occured , try again..." + error);
-    }
-
-    dispatch(createRestaurant({ data, token }));
-    // console.log(data);
-  };
 
   const formik = useFormik({
     initialValues,
-    onSubmit: handleSubmit,
+    onSubmit: async (values) => {
+      const data = {
+        name: values.name,
+        description: values.description,
+        cuisineType: values.cuisineType,
+        address: {
+          streetAddress: values["address-line1 address-search"],
+          city: values.city,
+          state: values.state,
+          postalCode: values.zip,
+          country: values.country,
+        },
+        contactInformation: {
+          email: values.email,
+          mobile: values.mobile,
+          twitter: values.twitter,
+          instagram: values.instagram,
+        },
+        openingHours: values.openingHours,
+      };
+
+      // Get geolocation from Mapbox
+      try {
+        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+          values["address-line1 address-search"]
+        )}.json?access_token=${accessToken}`;
+        const response = await fetch(url);
+        const geoLocationData = await response.json();
+
+        if (geoLocationData.features && geoLocationData.features.length > 0) {
+          const location = geoLocationData.features[0].center;
+          data.address.latitude = location[1];
+          data.address.longitude = location[0];
+        } else {
+          alert("Geolocation lookup failed, try again.");
+          return;
+        }
+      } catch (error) {
+        alert("Error fetching geolocation: " + error.message);
+        return;
+      }
+
+      // Create FormData for backend S3 upload
+      const formData = new FormData();
+      formData.append("restaurant", JSON.stringify(data));
+      values.images.forEach((file) => formData.append("images", file));
+
+      dispatch(createRestaurant({ formData, token }));
+    },
   });
 
-  const handleImageChange = async (event) => {
+  // Handle image selection
+  const handleImageChange = (event) => {
     const file = event.target.files[0];
+    if (!file) return;
     setUploadingImage(true);
-    const image = await uploadToCloudinary(file);
-    formik.setFieldValue("images", [...formik.values.images, image]);
+    formik.setFieldValue("images", [...formik.values.images, file]);
     setUploadingImage(false);
   };
 
@@ -119,19 +121,19 @@ const CreateRestaurantForm = () => {
                 <span className="w-24 h-24 cursor-pointer flex items-center justify-center p-3 border rounded-md border-gray-600">
                   <AddPhotoAlternateIcon className="text-white" />
                 </span>
-                {uploadImage && (
+                {uploadingImage && (
                   <div className="absolute inset-0 w-24 h-24 flex justify-center items-center">
                     <CircularProgress />
                   </div>
                 )}
               </label>
               <div className="flex flex-wrap gap-2">
-                {formik.values.images.map((image, index) => (
+                {formik.values.images.map((file, index) => (
                   <div className="relative" key={index}>
                     <img
                       className="w-24 h-24 object-cover"
-                      src={image}
-                      alt={`ProductImage ${index + 1}`}
+                      src={URL.createObjectURL(file)}
+                      alt={`RestaurantImage ${index + 1}`}
                     />
                     <IconButton
                       onClick={() => handleRemoveImage(index)}
@@ -150,6 +152,8 @@ const CreateRestaurantForm = () => {
               </div>
             </div>
 
+            {/* Restaurant Information */}
+            {/* ...keep all TextFields, AddressAutofill, Contact Info the same... */}
             {/* Restaurant Information */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <TextField
@@ -173,6 +177,7 @@ const CreateRestaurantForm = () => {
                 value={formik.values.description}
               />
             </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <TextField
                 fullWidth
@@ -306,13 +311,12 @@ const CreateRestaurantForm = () => {
                 value={formik.values.instagram}
               />
             </div>
-          </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-center mt-6">
-            <Button variant="contained" color="primary" type="submit">
-              Create Restaurant
-            </Button>
+            <div className="flex justify-center mt-6">
+              <Button variant="contained" color="primary" type="submit">
+                Create Restaurant
+              </Button>
+            </div>
           </div>
         </form>
       </div>
