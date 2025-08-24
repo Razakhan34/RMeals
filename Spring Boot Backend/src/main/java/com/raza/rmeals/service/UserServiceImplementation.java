@@ -10,6 +10,7 @@ import com.raza.rmeals.repository.PasswordResetTokenRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -43,6 +44,9 @@ public class UserServiceImplementation implements UserService {
 
   @Autowired
   private TemplateEngine templateEngine;
+
+  @Value("${app.frontend.url}")
+  private String frontendBaseUrl;
 
   @Override
   public User findUserProfileByJwt(String jwt) throws UserException {
@@ -109,7 +113,7 @@ public class UserServiceImplementation implements UserService {
 
     Context context = new Context();
     context.setVariable("name", user.getFullName());
-    context.setVariable("passwordResetURL", "http://localhost:3000/account/reset-password?token=" + resetToken);
+    context.setVariable("passwordResetURL", frontendBaseUrl + "/account/reset-password?token=" + resetToken);
 
     sendEmail(user.getEmail(),"Password Reset From RMeals",context,"email-password-reset");
 

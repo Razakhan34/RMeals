@@ -13,6 +13,7 @@ import NotFound from "../customers/pages/NotFound/NotFound";
 import TrackOrder from "../customers/pages/Orders/TrackOrder";
 import ProtectedRoute from "./ProtectedRoutes";
 import { useSelector } from "react-redux";
+import PaymentFailed from "../customers/pages/PaymentFailed/PaymentFailed";
 
 const CustomerRoutes = () => {
   const { auth } = useSelector((store) => store);
@@ -37,6 +38,7 @@ const CustomerRoutes = () => {
         />
         <Route path="/cart" element={<Cart />} />
         <Route path="/payment/success/:id" element={<PaymentSuccess />} />
+        <Route path="/payment/failed" element={<PaymentFailed />} />
         <Route
           path="/my-profile/*"
           element={<ProtectedRoute element={<Profile />} />}

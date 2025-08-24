@@ -17,6 +17,9 @@ public class PaymentServiceImplementation implements PaymentService {
     @Value("${stripe.api.key}")
     private String stripeSecretKey;
 
+    @Value("${app.frontend.url}")
+    private String frontendBaseUrl;
+
     @Override
     public PaymentResponse generatePaymentLink(Order order, Address savedAddress) throws StripeException, com.stripe.exception.StripeException {
 
@@ -56,8 +59,8 @@ public class PaymentServiceImplementation implements PaymentService {
         SessionCreateParams params = SessionCreateParams.builder()
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl("http://localhost:3000/payment/success/" + order.getId())
-                .setCancelUrl("http://localhost:3000/payment/cancel/")
+                .setSuccessUrl(frontendBaseUrl + "/payment/success/" + order.getId())
+                .setCancelUrl(frontendBaseUrl + "/payment/failed?reason=cancelled")
                 .setCustomer(customer.getId())
                 .addLineItem(SessionCreateParams.LineItem.builder()
                         .setQuantity(1L)
@@ -73,7 +76,7 @@ public class PaymentServiceImplementation implements PaymentService {
 
         Session session = Session.create(params);
 
-        System.out.println("session _____ " + session);
+//        System.out.println("session _____ " + session);
 
         PaymentResponse res = new PaymentResponse();
         res.setPayment_url(session.getUrl());

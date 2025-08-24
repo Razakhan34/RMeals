@@ -32,7 +32,6 @@ public class OrderController {
             CartException,
             OrderException, StripeException, com.stripe.exception.StripeException {
         User user=userService.findUserProfileByJwt(jwt);
-        System.out.println("req user "+user.getEmail());
         if(order!=null && order.getPaymentMethod().equals("stripe")) {
             PaymentResponse res = orderService.createOrderStripe(order,user);
             return ResponseEntity.ok(res);

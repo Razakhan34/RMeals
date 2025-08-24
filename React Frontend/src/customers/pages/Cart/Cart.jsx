@@ -36,6 +36,7 @@ import CartItemCard from "../../components/CartItem/CartItemCard";
 
 import { api } from "../../../config/api";
 import { AppConstants } from "../../../config/constant";
+import { useNavigate } from "react-router-dom";
 
 // Initial Values and Validation Schema
 const initialValues = {
@@ -74,6 +75,8 @@ const Cart = () => {
   });
   const dispatch = useDispatch();
   const { cart, auth } = useSelector((store) => store);
+
+  const navigate = useNavigate();
 
   const accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
 
@@ -196,7 +199,8 @@ const Cart = () => {
           description: "Order payment",
           handler: async function (response) {
             // await verifyPaymentHandler(response, savedData);
-            window.location.href = `http://localhost:3000/payment/success/${razorpayResponse.id}`;
+            //window.location.href = `http://localhost:3000/payment/success/${razorpayResponse.id}`;
+            navigate(`/payment/success/${razorpayResponse.id}`);
           },
           prefill: {
             name: recipientDetails.recipientName,
@@ -209,7 +213,7 @@ const Cart = () => {
             ondismiss: async () => {
               // await deleteOrderOnFailure(savedData.orderId);
               // toast.error("Payment cancelled");
-              window.alert("Payment Cancelled");
+              navigate("/payment/failed?reason=cancelled");
             },
           },
         };
@@ -218,10 +222,23 @@ const Cart = () => {
         rzp.on("payment.failed", async (response) => {
           // await deleteOrderOnFailure(savedData.orderId);
           // toast.error("Payment failed");
-          window.alert("Payment Failed");
-          console.error(response.error.description);
+          // navigate("/payment/failed?reason=payment_failed");
+          // if (razorpayResponse.orderId) {
+          //   await handleOrderFailure(razorpayResponse.orderId);
+          // }
+          // setIsProcessingPayment(false);
+
+          // Determine failure reason
+          let reason = "payment_failed";
+          if (response.error.code === "BAD_REQUEST_ERROR") {
+            reason = "network_error";
+          } else if (response.error.code === "GATEWAY_ERROR") {
+            reason = "payment_failed";
+          }
+
+          // Redirect to failure page
+          navigate(`/payment/failed?reason=${reason}`);
         });
-        // alert("Razorpay integration coming soon!");
       }
     } else {
       setOpenSnackbar(true);
