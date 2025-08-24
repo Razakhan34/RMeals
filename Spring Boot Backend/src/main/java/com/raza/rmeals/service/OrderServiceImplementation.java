@@ -1,13 +1,17 @@
 package com.raza.rmeals.service;
 
+import com.raza.rmeals.dto.RazorpayOrderResponse;
 import com.raza.rmeals.exception.*;
 import com.raza.rmeals.model.*;
 import com.raza.rmeals.repository.*;
 import com.raza.rmeals.request.CreateOrderRequest;
 import com.raza.rmeals.response.OrderAddressResponse;
 import com.raza.rmeals.response.PaymentResponse;
+import com.razorpay.RazorpayClient;
+import com.razorpay.RazorpayException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -43,15 +47,58 @@ public class OrderServiceImplementation implements OrderService {
 //    private NotificationService notificationService;
 
 
+    @Value("${razorpay.key.id}")
+    private String razorpayKeyId;
+    @Value("${razorpay.key.secret}")
+    private String razorpayKeySecret;
 
 
     @Override
-    public PaymentResponse createOrder(CreateOrderRequest order, User user) throws UserException,
+    public PaymentResponse createOrderStripe(CreateOrderRequest order, User user) throws UserException,
             RestaurantException, CartException, StripeException, com.stripe.exception.StripeException {
+
+        Order savedOrder = processAndSaveOrder(order, user);
+//        stripe payment related stuff
+        PaymentResponse res = paymentService.generatePaymentLink(savedOrder,savedOrder.getDeliveryAddress());
+        return res;
+    }
+
+    @Override
+    public RazorpayOrderResponse createOrderRazorpay(CreateOrderRequest order, User user) throws RestaurantException, CartException, UserException, RazorpayException {
+
+
+        Order savedOrder = processAndSaveOrder(order, user);
+
+//        Razorpay payment related stuff
+
+        RazorpayClient razorpayClient = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
+        JSONObject orderRequest = new JSONObject();
+        orderRequest.put("amount", savedOrder.getTotalAmount() * 100);
+        orderRequest.put("currency", "INR");
+        orderRequest.put("receipt", "order_rcptid_"+System.currentTimeMillis());
+        orderRequest.put("payment_capture", 1);
+
+        com.razorpay.Order orderRazorpay = razorpayClient.orders.create(orderRequest);
+
+        return RazorpayOrderResponse.builder()
+                .id(orderRazorpay.get("id"))
+                .entity(orderRazorpay.get("entity"))
+                .amount(orderRazorpay.get("amount"))
+                .currency(orderRazorpay.get("currency"))
+                .status(orderRazorpay.get("status"))
+                .created_at(orderRazorpay.get("created_at"))
+                .receipt(orderRazorpay.get("receipt"))
+                .build();
+    }
+
+    /**
+     * Common logic for processing, validating, and saving the order, for createOrderStripe and CreateOrderRazorpay
+     */
+    private Order processAndSaveOrder(CreateOrderRequest order, User user) throws UserException, RestaurantException, CartException {
 
         Address shippAddress = order.getDeliveryAddress();
 
-        // Check if the address already exists using stream and filter
+        // Check if the address already exists
         boolean addressExists = user.getAddresses().stream()
                 .anyMatch(existingAddress ->
                         existingAddress.getFullName().equals(shippAddress.getFullName()) &&
@@ -64,24 +111,20 @@ public class OrderServiceImplementation implements OrderService {
                                 Math.abs(existingAddress.getLongitude() - shippAddress.getLongitude()) < 0.00001
                 );
 
-
         Address savedAddress = addressRepository.save(shippAddress);
 
         if (!addressExists) {
             user.getAddresses().add(savedAddress);
         }
 
-
-
         userRepository.save(user);
 
         Optional<Restaurant> restaurant = restaurantRepository.findById(order.getRestaurantId());
-        if(restaurant.isEmpty()) {
-            throw new RestaurantException("Restaurant not found with id "+order.getRestaurantId());
+        if (restaurant.isEmpty()) {
+            throw new RestaurantException("Restaurant not found with id " + order.getRestaurantId());
         }
 
         Order createdOrder = new Order();
-
         createdOrder.setCustomer(user);
         createdOrder.setDeliveryAddress(savedAddress);
         createdOrder.setCreatedAt(new Date());
@@ -91,35 +134,35 @@ public class OrderServiceImplementation implements OrderService {
         Cart cart = cartService.findCartByUserId(user.getId());
 
         List<OrderItem> orderItems = new ArrayList<>();
-
         for (CartItem cartItem : cart.getItems()) {
             OrderItem orderItem = new OrderItem();
             orderItem.setFood(cartItem.getFood());
             orderItem.setIngredients(cartItem.getIngredients());
             orderItem.setQuantity(cartItem.getQuantity());
-            orderItem.setTotalPrice(cartItem.getFood().getPrice()* cartItem.getQuantity());
+            orderItem.setTotalPrice(cartItem.getFood().getPrice() * cartItem.getQuantity());
 
             OrderItem savedOrderItem = orderItemRepository.save(orderItem);
             orderItems.add(savedOrderItem);
         }
 
-        Long totalPrice = cartService.calculateCartTotals(cart);
+        int delivery_fees = 21;
+        int platform_fees = 5;
+        int gst_and_restaurant_charge = 33; // calculate gst later
+
+        Long totalPrice = cartService.calculateCartTotals(cart) + delivery_fees + platform_fees
+                + gst_and_restaurant_charge;
 
         createdOrder.setTotalAmount(totalPrice);
         createdOrder.setTotalItem(cart.getItems().size());
-        createdOrder.setRestaurant(restaurant.get());
-
         createdOrder.setItems(orderItems);
+
         Order savedOrder = orderRepository.save(createdOrder);
 
         restaurant.get().getOrders().add(savedOrder);
-
         restaurantRepository.save(restaurant.get());
 
-        PaymentResponse res = paymentService.generatePaymentLink(savedOrder,savedAddress);
-        return res;
+        return savedOrder;
     }
-
     @Override
     public void cancelOrder(Long orderId) throws OrderException {
         Order order = findOrderById(orderId);

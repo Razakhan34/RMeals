@@ -17,7 +17,7 @@ export const createOrder = (reqData) => {
   return async (dispatch) => {
     dispatch(createOrderRequest());
     try {
-      const { data } = await api.post("/api/order", reqData.order, {
+      const { data } = await api.post("/api/order/stripe", reqData.order, {
         headers: {
           Authorization: `Bearer ${reqData.token}`,
         },

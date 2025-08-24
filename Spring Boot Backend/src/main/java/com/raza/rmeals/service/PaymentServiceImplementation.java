@@ -3,7 +3,6 @@ package com.raza.rmeals.service;
 import com.raza.rmeals.exception.StripeException;
 import com.raza.rmeals.model.Address;
 import com.raza.rmeals.model.Order;
-import com.raza.rmeals.model.User;
 import com.raza.rmeals.response.PaymentResponse;
 import com.stripe.Stripe;
 import com.stripe.model.Customer;
@@ -58,7 +57,7 @@ public class PaymentServiceImplementation implements PaymentService {
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl("http://localhost:3000/payment/success/" + order.getId())
-                .setCancelUrl("http://localhost:3000/cancel")
+                .setCancelUrl("http://localhost:3000/payment/cancel/")
                 .setCustomer(customer.getId())
                 .addLineItem(SessionCreateParams.LineItem.builder()
                         .setQuantity(1L)

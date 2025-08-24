@@ -123,6 +123,13 @@
 			<version>3.3.4</version>
 		</dependency>
 
+<!--		Razorpay dependency java  -->
+		<dependency>
+			<groupId>com.razorpay</groupId>
+			<artifactId>razorpay-java</artifactId>
+			<version>1.4.1</version>
+		</dependency>
+
 
 
 

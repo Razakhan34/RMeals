@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 public class CreateOrderRequest {
     private Long restaurantId;
     private Address deliveryAddress;
+    private String paymentMethod;
 }

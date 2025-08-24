@@ -19,8 +19,6 @@ public class AdminOrderController {
     @Autowired
     private OrderService orderService;
 
-    @Autowired
-    private UserService userService;
 
 
     @DeleteMapping("/order/{orderId}")
@@ -50,7 +48,7 @@ public class AdminOrderController {
     @PutMapping("/orders/{orderId}/{orderStatus}")
     public ResponseEntity<Order> updateOrders(@PathVariable Long orderId,
                                               @PathVariable String orderStatus)
-            throws OrderException, RestaurantException{
+            throws OrderException {
 
         Order orders = orderService.updateOrder(orderId, orderStatus);
         return ResponseEntity.ok(orders);
