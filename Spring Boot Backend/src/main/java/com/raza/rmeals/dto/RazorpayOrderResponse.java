@@ -19,4 +19,5 @@ public class RazorpayOrderResponse {
     private String status;
     private Date created_at;
     private String receipt;
+    private Long orderId; // Add this field to include database order ID
 }

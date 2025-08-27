@@ -156,6 +156,19 @@ const Cart = () => {
     }
   };
 
+  // Handle payment failure by calling the backend API
+  const handleOrderFailure = async (orderId) => {
+    try {
+      await api.delete(`/api/order/payment-failure/${orderId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      });
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+    }
+  };
+
   const handleProceedToPay = async () => {
     if (
       !selectedAddress ||
@@ -211,6 +224,10 @@ const Cart = () => {
           },
           modal: {
             ondismiss: async () => {
+              if (razorpayResponse.orderId) {
+                await handleOrderFailure(razorpayResponse.orderId);
+              }
+              // setIsProcessingPayment(false);
               // await deleteOrderOnFailure(savedData.orderId);
               // toast.error("Payment cancelled");
               navigate("/payment/failed?reason=cancelled");
@@ -235,6 +252,11 @@ const Cart = () => {
           } else if (response.error.code === "GATEWAY_ERROR") {
             reason = "payment_failed";
           }
+
+          if (razorpayResponse.orderId) {
+            await handleOrderFailure(razorpayResponse.orderId);
+          }
+          // setIsProcessingPayment(false);
 
           // Redirect to failure page
           navigate(`/payment/failed?reason=${reason}`);

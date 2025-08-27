@@ -4,6 +4,7 @@ import com.raza.rmeals.dto.RazorpayOrderResponse;
 import com.raza.rmeals.exception.*;
 import com.raza.rmeals.model.Order;
 import com.raza.rmeals.model.User;
+import com.raza.rmeals.repository.OrderRepository;
 import com.raza.rmeals.request.CreateOrderRequest;
 import com.raza.rmeals.response.OrderAddressResponse;
 import com.raza.rmeals.response.PaymentResponse;
@@ -24,6 +25,9 @@ public class OrderController {
     private OrderService orderService;
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     @PostMapping("/order/stripe")
     public ResponseEntity<PaymentResponse> createOrderStripe(@RequestBody CreateOrderRequest order,
@@ -83,4 +87,22 @@ public class OrderController {
             return new ResponseEntity<List<Order>>(HttpStatus.BAD_REQUEST);
         }
     }
+
+//    when payment fails then delete the particular order from database
+@DeleteMapping("/order/payment-failure/{orderId}")
+public ResponseEntity<String> handlePaymentFailure(@PathVariable Long orderId,
+                                                   @RequestHeader("Authorization") String jwt)
+        throws OrderException, UserException {
+    User user = userService.findUserProfileByJwt(jwt);
+
+    // Verify that the order belongs to the user
+    Order order = orderRepository.findOrderById(orderId);
+
+    if (!order.getCustomer().getId().equals(user.getId())) {
+        throw new OrderException("Unauthorized access to order");
+    }
+
+    orderService.handlePaymentFailure(orderId);
+    return ResponseEntity.ok("Order cancelled");
+}
 }

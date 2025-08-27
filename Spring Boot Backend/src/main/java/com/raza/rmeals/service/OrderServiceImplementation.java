@@ -9,6 +9,7 @@ import com.raza.rmeals.response.OrderAddressResponse;
 import com.raza.rmeals.response.PaymentResponse;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
+import jakarta.transaction.Transactional;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,8 +60,15 @@ public class OrderServiceImplementation implements OrderService {
 
         Order savedOrder = processAndSaveOrder(order, user);
 //        stripe payment related stuff
-        PaymentResponse res = paymentService.generatePaymentLink(savedOrder,savedOrder.getDeliveryAddress());
-        return res;
+        try {
+            PaymentResponse res = paymentService.generatePaymentLink(savedOrder,savedOrder.getDeliveryAddress());
+            return res;
+        }
+        catch (Exception e) {
+            // If Razorpay order creation fails, delete the created order
+            //deleteOrderAndCleanup(savedOrder);
+            throw e;
+        }
     }
 
     @Override
@@ -69,26 +77,33 @@ public class OrderServiceImplementation implements OrderService {
 
         Order savedOrder = processAndSaveOrder(order, user);
 
-//        Razorpay payment related stuff
+        try {
+            //        Razorpay payment related stuff
+            RazorpayClient razorpayClient = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
+            JSONObject orderRequest = new JSONObject();
+            orderRequest.put("amount", savedOrder.getTotalAmount() * 100);
+            orderRequest.put("currency", "INR");
+            orderRequest.put("receipt", "order_rcptid_"+System.currentTimeMillis());
+            orderRequest.put("payment_capture", 1);
 
-        RazorpayClient razorpayClient = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
-        JSONObject orderRequest = new JSONObject();
-        orderRequest.put("amount", savedOrder.getTotalAmount() * 100);
-        orderRequest.put("currency", "INR");
-        orderRequest.put("receipt", "order_rcptid_"+System.currentTimeMillis());
-        orderRequest.put("payment_capture", 1);
+            com.razorpay.Order orderRazorpay = razorpayClient.orders.create(orderRequest);
 
-        com.razorpay.Order orderRazorpay = razorpayClient.orders.create(orderRequest);
+            return RazorpayOrderResponse.builder()
+                    .id(orderRazorpay.get("id"))
+                    .entity(orderRazorpay.get("entity"))
+                    .amount(orderRazorpay.get("amount"))
+                    .currency(orderRazorpay.get("currency"))
+                    .status(orderRazorpay.get("status"))
+                    .created_at(orderRazorpay.get("created_at"))
+                    .receipt(orderRazorpay.get("receipt"))
+                    .orderId(savedOrder.getId())
+                    .build();
 
-        return RazorpayOrderResponse.builder()
-                .id(orderRazorpay.get("id"))
-                .entity(orderRazorpay.get("entity"))
-                .amount(orderRazorpay.get("amount"))
-                .currency(orderRazorpay.get("currency"))
-                .status(orderRazorpay.get("status"))
-                .created_at(orderRazorpay.get("created_at"))
-                .receipt(orderRazorpay.get("receipt"))
-                .build();
+        }catch (Exception e) {
+            // If Razorpay order creation fails, delete the created order
+            deleteOrderAndCleanup(savedOrder);
+            throw e;
+        }
     }
 
     /**
@@ -163,7 +178,53 @@ public class OrderServiceImplementation implements OrderService {
 
         return savedOrder;
     }
+
+    /**
+     * Delete order and cleanup related data when payment fails
+     */
+    @Transactional
+    protected void deleteOrderAndCleanup(Order order) {
+        try {
+            // Remove order from restaurant's orders list
+            Restaurant restaurant = order.getRestaurant();
+            if (restaurant != null && restaurant.getOrders() != null) {
+                restaurant.getOrders().remove(order);
+                restaurantRepository.save(restaurant);
+            }
+
+            // Delete order items first (due to foreign key constraints)
+            if (order.getItems() != null) {
+                orderItemRepository.deleteAll(order.getItems());
+            }
+
+            // Delete the order
+            orderRepository.delete(order);
+
+            System.out.println("Order " + order.getId() + " deleted due to payment failure");
+        } catch (Exception e) {
+            System.err.println("Error deleting order: " + e.getMessage());
+        }
+    }
+
+    /**
+     * New method to handle payment failure cleanup from external calls
+     */
     @Override
+    @Transactional
+    public void handlePaymentFailure(Long orderId) throws OrderException {
+        Order order = findOrderById(orderId);
+        if(order==null) {
+            throw new OrderException("Order not found with the id "+orderId);
+        }
+
+        // Only delete if order is still in PENDING status
+        if ("PENDING".equals(order.getOrderStatus())) {
+            deleteOrderAndCleanup(order);
+        }
+    }
+
+//    if admin want to cancel the order
+//    @Override
     public void cancelOrder(Long orderId) throws OrderException {
         Order order = findOrderById(orderId);
         if(order==null) {

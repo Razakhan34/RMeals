@@ -60,7 +60,7 @@ public class PaymentServiceImplementation implements PaymentService {
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl(frontendBaseUrl + "/payment/success/" + order.getId())
-                .setCancelUrl(frontendBaseUrl + "/payment/failed?reason=cancelled")
+                .setCancelUrl(frontendBaseUrl + "/payment/failed?reason=cancelled&orderId=" + order.getId())
                 .setCustomer(customer.getId())
                 .addLineItem(SessionCreateParams.LineItem.builder()
                         .setQuantity(1L)

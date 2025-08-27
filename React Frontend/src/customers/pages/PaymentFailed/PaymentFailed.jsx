@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import PaymentIcon from "@mui/icons-material/Payment";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import HomeIcon from "@mui/icons-material/Home";
 import { Button, Typography, Box, Paper } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
+import { api } from "../../../config/api";
 
 // Black-gray theme with subtle teal/blue accent
 const primaryColor = "#3A506B"; // Muted blue-gray
@@ -16,10 +17,36 @@ const gradientEnd = "#0B132B"; // Deep gray/black
 const PaymentFailed = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
   const searchParams = new URLSearchParams(location.search);
+  const orderId = searchParams.get("orderId");
   const reason =
     searchParams.get("reason") || location.state?.reason || "unknown";
+
+  // Delete order on payment failure for stripe payment gateway if user is unable to do payment
+  const calledRef = useRef(false);
+
+  useEffect(() => {
+    const handlePaymentFailure = async () => {
+      if (calledRef.current) return; // prevent repeat call
+      calledRef.current = true;
+      if (reason === "cancelled" && orderId) {
+        try {
+          // Call your backend API to delete the order
+          await api.delete(`/api/order/payment-failure/${orderId}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+            },
+          });
+
+          console.log("Order cancelled successfully");
+        } catch (error) {
+          console.error("Error cancelling order:", error);
+        }
+      }
+    };
+
+    handlePaymentFailure();
+  }, [reason, orderId]);
 
   const navigateToCart = () => navigate("/cart");
   const navigateToHome = () => navigate("/");
