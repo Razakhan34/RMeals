@@ -2,6 +2,7 @@ package com.raza.rmeals.controller;
 
 import com.raza.rmeals.exception.FoodException;
 import com.raza.rmeals.model.Food;
+import com.raza.rmeals.model.Restaurant;
 import com.raza.rmeals.service.FoodService;
 import com.raza.rmeals.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,13 @@ public class MenuItemController {
             @RequestParam String name) {
         List<Food> menuItem = menuItemService.searchFood(name);
         return ResponseEntity.ok(menuItem);
+    }
+
+    @GetMapping("/popular-cuisines")
+    public ResponseEntity<List<Food>> getPopularCuisines(
+            @RequestParam(defaultValue = "9") int limit) {
+        List<Food> popular = menuItemService.getPopularCuisines(limit);
+        return ResponseEntity.ok(popular);
     }
 
     @GetMapping("/restaurant/{restaurantId}")

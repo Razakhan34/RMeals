@@ -26,4 +26,6 @@ public interface RestaurantService {
 
   public RestaurantDto addToFavorites(Long restaurantId, User user) throws RestaurantException;
   public Restaurant updateRestaurantStatus(Long id) throws RestaurantException;
+
+   public List<Restaurant> findNearbyRestaurants(double latitude, double longitude, int radiusKm);
 }

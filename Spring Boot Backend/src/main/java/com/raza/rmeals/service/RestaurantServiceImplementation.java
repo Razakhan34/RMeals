@@ -2,6 +2,7 @@ package com.raza.rmeals.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -181,5 +182,33 @@ public class RestaurantServiceImplementation implements RestaurantService {
     restaurant.setOpen(!restaurant.isOpen());
     return restaurantRepository.save(restaurant);
   }
+
+  @Override
+  public List<Restaurant> findNearbyRestaurants(double latitude, double longitude, int radiusKm) {
+    // Example: filter all restaurants & calculate distance (Haversine formula)
+    List<Restaurant> allRestaurants = restaurantRepository.findAll();
+
+    //  this  will be used later when i will integrate nearby restaurant with latitude and longitude
+//    return allRestaurants.stream()
+//            .filter(r -> calculateDistance(latitude, longitude, r.getLatitude(), r.getLongitude()) <= radiusKm)
+//            .collect(Collectors.toList());
+
+    return allRestaurants.stream()
+            .filter(r -> r.getName().equalsIgnoreCase("Raza Heaven") ||
+                    r.getName().equalsIgnoreCase("Vashi Dhaba"))
+            .collect(Collectors.toList());
+  }
+
+//  this method will be used later when i will integrate nearby restaurant with latitude and longitude
+//  private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+//    final int R = 6371; // Earth radius in KM
+//    double latDistance = Math.toRadians(lat2 - lat1);
+//    double lonDistance = Math.toRadians(lon2 - lon1);
+//    double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+//            + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+//            * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+//    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+//    return R * c; // distance in KM
+//  }
 
 }

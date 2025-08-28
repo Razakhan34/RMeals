@@ -9,12 +9,10 @@ import com.raza.rmeals.model.Restaurant;
 import com.raza.rmeals.repository.FoodRepository;
 import com.raza.rmeals.request.CreateFoodRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -139,6 +137,12 @@ public class FoodServiceImplementation implements FoodService {
     }
 
     @Override
+    public List<Food> getPopularCuisines(int limit) {
+        List<String> popularCategories = Arrays.asList("Pizza", "Biryani", "Noodles", "Burger", "Cake","Rice & Noodles");
+        return foodRepository.findByFoodCategoryIn(popularCategories, PageRequest.of(0, limit));
+    }
+
+    @Override
     public Food updateAvailibilityStatus(Long id) throws FoodException {
         Food food = findFoodById(id);
 
@@ -146,6 +150,8 @@ public class FoodServiceImplementation implements FoodService {
         foodRepository.save(food);
         return food;
     }
+
+
 
     @Override
     public Food findFoodById(Long foodId) throws FoodException {

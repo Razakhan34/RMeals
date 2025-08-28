@@ -20,7 +20,6 @@ import { API_URL, api } from "../../config/api";
 import axios from "axios";
 
 export const registerUser = (reqData) => async (dispatch) => {
-  console.log("resgister request data ", reqData.userData);
   try {
     dispatch({ type: REGISTER_REQUEST });
 
@@ -104,7 +103,6 @@ export const addToFavorites = ({ restaurantId, jwt }) => {
           },
         }
       );
-      console.log("Add to favorites ", data);
       dispatch({ type: ADD_TO_FAVORITES_SUCCESS, payload: data });
     } catch (error) {
       console.log("catch error ", error);
@@ -124,8 +122,6 @@ export const resetPasswordRequest = (email) => async (dispatch) => {
       {}
     );
 
-    console.log("reset password -: ", data);
-
     dispatch({ type: REQUEST_RESET_PASSWORD_SUCCESS, payload: data });
   } catch (error) {
     console.log("error ", error);
@@ -140,9 +136,6 @@ export const resetPassword = (reqData) => async (dispatch) => {
       `${API_URL}/auth/reset-password`,
       reqData.data
     );
-
-    console.log("reset password -: ", data);
-
     reqData.navigate("/password-change-success");
 
     dispatch({ type: REQUEST_RESET_PASSWORD_SUCCESS, payload: data });

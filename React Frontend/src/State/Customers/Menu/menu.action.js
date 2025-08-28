@@ -3,9 +3,6 @@ import {
   createMenuItemFailure,
   createMenuItemRequest,
   createMenuItemSuccess,
-  deleteMenuItemFailure,
-  deleteMenuItemRequest,
-  deleteMenuItemSuccess,
   getMenuItemsByRestaurantIdFailure,
   getMenuItemsByRestaurantIdRequest,
   getMenuItemsByRestaurantIdSuccess,
@@ -17,6 +14,9 @@ import {
   SEARCH_MENU_ITEM_FAILURE,
   SEARCH_MENU_ITEM_REQUEST,
   SEARCH_MENU_ITEM_SUCCESS,
+  SEARCH_POPULAR_CUISINES_MENU_ITEM_FAILURE,
+  SEARCH_POPULAR_CUISINES_MENU_ITEM_REQUEST,
+  SEARCH_POPULAR_CUISINES_MENU_ITEM_SUCCESS,
   UPDATE_MENU_ITEMS_AVAILABILITY_FAILURE,
   UPDATE_MENU_ITEMS_AVAILABILITY_REQUEST,
   UPDATE_MENU_ITEMS_AVAILABILITY_SUCCESS,
@@ -71,10 +71,32 @@ export const searchMenuItem = ({ keyword, jwt }) => {
           Authorization: `Bearer ${jwt}`,
         },
       });
-      console.log("data ----------- ", data);
       dispatch({ type: SEARCH_MENU_ITEM_SUCCESS, payload: data });
     } catch (error) {
       dispatch({ type: SEARCH_MENU_ITEM_FAILURE });
+    }
+  };
+};
+
+// create searchPopularCuisinesMenuItem action creators
+export const searchPopularCuisinesMenuItem = (jwt) => {
+  return async (dispatch) => {
+    dispatch({ type: SEARCH_POPULAR_CUISINES_MENU_ITEM_REQUEST });
+    try {
+      const { data } = await api.get("api/food/popular-cuisines?limit=9", {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+      dispatch({
+        type: SEARCH_POPULAR_CUISINES_MENU_ITEM_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: SEARCH_POPULAR_CUISINES_MENU_ITEM_FAILURE,
+        error: error,
+      });
     }
   };
 };

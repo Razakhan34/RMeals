@@ -33,8 +33,23 @@ public class RestaurantController {
         return ResponseEntity.ok(restaurant);
     }
 
+    //    api for getting restaurant nearby
+    @GetMapping("/nearby-restaurants")
+    public ResponseEntity<List<Restaurant>> getNearbyRestaurants() {
+        //   @RequestParam double latitude,
+        ////            @RequestParam double longitude,
+        ////            @RequestParam(defaultValue = "5") int radiusKm
+//        i will integrage  lat and longitude later but for now i am getting some dummy restaurant
+        double latitude = 0.0f;
+        double longitude = 0.0f;
+        int radiusKm = 5;
+        List<Restaurant> nearbyRestaurants = restaurantService.findNearbyRestaurants(latitude, longitude, radiusKm);
+        return ResponseEntity.ok(nearbyRestaurants);
+    }
 
-//    Get all restaurant details
+
+
+    //    Get all restaurant details
     @GetMapping()
     public ResponseEntity<List<Restaurant>> getAllRestaurants() {
 

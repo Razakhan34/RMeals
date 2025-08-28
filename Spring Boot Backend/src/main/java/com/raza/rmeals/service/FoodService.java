@@ -24,4 +24,6 @@ public interface FoodService {
     public Food findFoodById(Long foodId) throws FoodException;
 
     public Food updateAvailibilityStatus(Long foodId) throws FoodException;
+
+    List<Food> getPopularCuisines(int limit);
 }

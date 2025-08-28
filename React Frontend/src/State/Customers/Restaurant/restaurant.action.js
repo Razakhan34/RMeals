@@ -11,6 +11,9 @@ import {
   getAllRestaurantsFailure,
   getAllRestaurantsRequest,
   getAllRestaurantsSuccess,
+  getNearbyRestaurantsFailure,
+  getNearbyRestaurantsRequest,
+  getNearbyRestaurantsSuccess,
   getRestaurantByIdFailure,
   getRestaurantByIdRequest,
   getRestaurantByIdSuccess,
@@ -56,7 +59,6 @@ export const getAllRestaurantsAction = (token) => {
         },
       });
       dispatch(getAllRestaurantsSuccess(data));
-      console.log("all restaurant ", data);
     } catch (error) {
       dispatch(getAllRestaurantsFailure(error));
     }
@@ -81,6 +83,33 @@ export const getRestaurantById = (reqData) => {
       dispatch(getRestaurantByIdFailure(error));
     }
   };
+};
+
+// 🏠 Fetch nearby restaurants
+export const getNearbyRestaurants = (jwt) => {
+  return async (dispatch) => {
+    dispatch(getNearbyRestaurantsRequest());
+    try {
+      const response = await api.get(`api/restaurants/nearby-restaurants`, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+      dispatch(getNearbyRestaurantsSuccess(response.data));
+    } catch (error) {
+      dispatch(getNearbyRestaurantsFailure(error));
+    }
+  };
+
+  // this  will be used later when i will integrate nearby restaurant with latitude and longitude
+  // const response = await api.get(
+  //   `/api/restaurant/nearby-restaurant?latitude=${latitude}&longitude=${longitude}&radiusKm=5`,
+  //   {
+  //     headers: {
+  //       Authorization: `Bearer ${jwt}`,
+  //     },
+  //   }
+  // );
 };
 
 export const getRestaurantByUserId = (jwt) => {
