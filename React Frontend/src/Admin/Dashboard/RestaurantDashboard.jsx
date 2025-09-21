@@ -9,7 +9,6 @@ import MenuItemTable from "../Food/MenuItemTable";
 const RestaurantDashboard = () => {
   const { id } = useParams();
   const { restaurant } = useSelector((store) => store);
-  console.log("restaurants id ", id);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -21,7 +20,6 @@ const RestaurantDashboard = () => {
     );
   }, []);
 
-  console.log("restaurant", restaurant);
   return (
     <div className="px-2">
       <Grid container spacing={1}>

@@ -13,8 +13,6 @@ const HomePage = () => {
   const { auth, restaurant } = useSelector((store) => store);
   const dispatch = useDispatch();
 
-  console.log(auth);
-
   useEffect(() => {
     if (auth.user) {
       dispatch(getAllRestaurantsAction(localStorage.getItem("jwt")));

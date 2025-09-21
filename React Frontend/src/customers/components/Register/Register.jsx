@@ -37,7 +37,6 @@ const RegistrationForm = () => {
   const navigate = useNavigate();
 
   const handleSubmit = (values) => {
-    console.log("Form values:", values);
     dispatch(registerUser({ userData: values, navigate }));
   };
 

@@ -8,7 +8,6 @@ import AddRestaurantCard from "./AddRestaurantCard";
 const AdminDashboard = () => {
   const params = useParams();
   const { restaurant } = useSelector((state) => state);
-  console.log("params", params);
   const dispatch = useDispatch();
 
   useEffect(() => {

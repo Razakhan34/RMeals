@@ -134,8 +134,6 @@ export const getRestaurantByUserId = (jwt) => {
 };
 
 export const createRestaurant = ({ formData, token }) => {
-  console.log("token-----------", token);
-  console.log("formData-----------", formData);
   return async (dispatch) => {
     dispatch(createRestaurantRequest());
     try {
@@ -207,7 +205,6 @@ export const updateRestaurantStatus = ({ restaurantId, jwt }) => {
           },
         }
       );
-      console.log("ressssss ", res.data);
       dispatch({ type: UPDATE_RESTAURANT_STATUS_SUCCESS, payload: res.data });
     } catch (error) {
       console.log("error ", error);
@@ -267,7 +264,6 @@ export const deleteEventAction = ({ eventId, jwt }) => {
           Authorization: `Bearer ${jwt}`,
         },
       });
-      console.log("DELETE events ", res.data);
       dispatch({ type: DELETE_EVENTS_SUCCESS, payload: eventId });
     } catch (error) {
       console.log("catch - ", error);

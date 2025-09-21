@@ -28,7 +28,6 @@ export default function SuperAdminSidebar({ handleClose, open }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { id } = useParams();
-  console.log("restaurantId ", id);
 
   const handleNavigate = (item) => {
     navigate(`/super-admin${item.path}`);
