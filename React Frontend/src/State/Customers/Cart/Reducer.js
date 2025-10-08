@@ -46,9 +46,7 @@ const cartReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: false,
-        cartItems: state.cartItems.filter((item) =>
-          item.id !== action.payload
-        ),
+        cartItems: state.cartItems.filter((item) => item.id !== action.payload),
       };
     case actionTypes.FIND_CART_FAILURE:
     case actionTypes.UPDATE_CARTITEM_FAILURE:
@@ -60,9 +58,9 @@ const cartReducer = (state = initialState, action) => {
         error: action.payload,
       };
 
-      case LOGOUT:
+    case LOGOUT:
       localStorage.removeItem("jwt");
-      return { ...state, cartItems:[],cart:null, success: "logout success" };
+      return { ...state, cartItems: [], cart: null, success: "logout success" };
     default:
       return state;
   }

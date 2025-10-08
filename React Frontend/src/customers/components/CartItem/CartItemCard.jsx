@@ -64,7 +64,7 @@ const CartItemCard = ({ item }) => {
         </div>
       </div>
       <div className="pt-3 space-x-2">
-        {item.ingredients.map((item) => (
+        {item.ingredients?.map((item) => (
           <Chip label={item} />
         ))}
       </div>
