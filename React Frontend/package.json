@@ -11,6 +11,7 @@
     "@mui/material": "^5.14.6",
     "@mui/styled-engine-sc": "^5.14.6",
     "@mui/x-date-pickers": "^6.18.0",
+    "@stomp/stompjs": "^7.2.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -27,6 +28,7 @@
     "redux": "^4.2.1",
     "redux-thunk": "^2.4.2",
     "slick-carousel": "^1.8.1",
+    "sockjs-client": "^1.6.1",
     "styled-components": "^5.3.11",
     "web-vitals": "^2.1.4",
     "yup": "^1.2.0"

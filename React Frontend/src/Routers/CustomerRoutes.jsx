@@ -14,6 +14,8 @@ import TrackOrder from "../customers/pages/Orders/TrackOrder";
 import ProtectedRoute from "./ProtectedRoutes";
 import { useSelector } from "react-redux";
 import PaymentFailed from "../customers/pages/PaymentFailed/PaymentFailed";
+import DeliveryBoyApp from "../customers/components/DeliveryTracking/DeliveryBoyApp";
+import CustomerTrackOrder from "../customers/components/DeliveryTracking/CustomerTrackOrder";
 
 const CustomerRoutes = () => {
   const { auth } = useSelector((store) => store);
@@ -56,6 +58,11 @@ const CustomerRoutes = () => {
           exact
           path="/password-change-success"
           element={<PasswordChangeSuccess />}
+        />
+        <Route path="/delivery/track/:orderId" element={<DeliveryBoyApp />} />
+        <Route
+          path="/customer/track/:orderId"
+          element={<CustomerTrackOrder />}
         />
         <Route exact path="/*" element={<NotFound />} />
       </Routes>
